@@ -1,0 +1,97 @@
+package com.example.demo.test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+@WebMvcTest(ProductController.class)
+public class ProductControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private ProductService productService;
+
+    @MockBean
+    private RabbitTemplate rabbitTemplate;
+
+    @InjectMocks
+    private ProductController productController;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    
+    @Test
+    public void testAddProduct() throws Exception {
+        Product product = new Product();
+        product.setId(1L);
+        product.setName("Test Product");
+        product.setPrice(25.0);
+
+        when(productService.addProduct(any(Product.class))).thenReturn(product);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/products/add")
+                .content(asJsonString(product))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+
+        verify(productService, times(1)).addProduct(any(Product.class));
+    }
+
+    @Test
+    public void testGetAllProducts() throws Exception {
+        List<Product> productList = Arrays.asList(
+                new Product(1L, "Product 1", 10.0),
+                new Product(2L, "Product 2", 15.0)
+        );
+
+        when(productService.getAllProducts()).thenReturn(productList);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/products/all")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.size()").value(productList.size()));
+
+        verify(productService, times(1)).getAllProducts();
+    }
+
+    @Test
+    public void testSelectProductById() throws Exception {
+        long productId = 1L;
+        Product product = new Product(productId, "Selected Product", 20.0);
+
+        when(productService.selectProductById(productId)).thenReturn(product);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/products/{id}", productId)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(productId));
+
+        verify(productService, times(1)).selectProductById(productId);
+    }
+
+    // Helper method to convert an object to JSON string
+    private static String asJsonString(final Object obj) {
+        try {
+            return new ObjectMapper().writeValueAsString(obj);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        
+        
+}

@@ -1,0 +1,51 @@
+package com.shoppingcart.productservice.testcontroller;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.shoppingcart.productservice.controller.ProductController;
+import com.shoppingcart.productservice.entity.Product;
+import com.shoppingcart.productservice.service.ProductService;
+
+@ExtendWith(MockitoExtension.class)
+public class ProductControllerTest {
+
+	@InjectMocks
+	private ProductController product;
+	
+	@Mock
+	private ProductService productservicetest;
+	
+	@Test
+	public void getAllProducts() {
+		
+		Product product1 = new Product(1,"Electronics","Samsung",100,true);
+		Product product2 = new Product(2,"Electronics","Apple",250,true);
+		
+		List<Product> Expectedlist = new ArrayList<>();
+		Expectedlist.add(product1);
+		Expectedlist.add(product2);
+		
+		when(productservicetest.get()).thenReturn(Expectedlist);
+		List<Product> ActualList =productservicetest.get();
+		assertEquals(Expectedlist,ActualList);
+	}
+	
+	@Test
+	public void getById() {
+		Product Expected = new Product(1,"Electronics","Samsung",100,true);
+		when(productservicetest.byId(Mockito.anyInt())).thenReturn(Expected);
+		Product Actual =productservicetest.byId(1);
+		assertEquals(Actual,Expected);
+	}
+}

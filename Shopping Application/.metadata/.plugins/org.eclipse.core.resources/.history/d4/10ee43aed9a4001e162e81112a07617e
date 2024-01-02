@@ -1,0 +1,21 @@
+package com.example.demo.controller;
+
+
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.stereotype.Component;
+
+@Component
+public class ConsumerController {
+
+    @RabbitListener(queues = "rabbit_queue")
+    public void listenAddProduct(Product product) {
+        // Perform any additional processing upon receiving the "product.add" message
+        System.out.println("Received RabbitMQ message - Product added: " + product);
+    }
+
+    @RabbitListener(queues = "rabbit_queue")
+    public void listenSelectProduct(Product product) {
+        // Perform any additional processing upon receiving the "product.selected" message
+        System.out.println("Received RabbitMQ message - Product selected: " + product);
+    }
+}

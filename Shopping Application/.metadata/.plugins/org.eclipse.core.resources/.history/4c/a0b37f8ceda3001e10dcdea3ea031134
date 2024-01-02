@@ -1,0 +1,35 @@
+package com.example.demo.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class ProductService {
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    public void addProduct(Product product) {
+        // Business logic for adding a product
+        // You can perform validation, additional processing, and then save to the repository
+        productRepository.save(product);
+    }
+
+    public List<Product> getAllProducts() {
+        // Business logic for fetching all products
+        return productRepository.findAll();
+    }
+
+    public void selectProduct(Long productId) {
+        // Business logic for selecting a product
+        // You can update the state of the product or perform any necessary actions
+        // For simplicity, let's assume updating a flag in the product entity
+        Product selectedProduct = productRepository.findById(productId).orElse(null);
+        if (selectedProduct != null) {
+            selectedProduct.setSelected(true);
+            productRepository.save(selectedProduct);
+        }
+    }
+}
